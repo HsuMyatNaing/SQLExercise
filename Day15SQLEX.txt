@@ -1,0 +1,144 @@
+ create table team(
+    -> team_id varchar(30) primary key,
+    -> team_name varchar(100),
+    -> foundeddate date);
+Query OK, 0 rows affected (4.14 sec)
+
+mysql> insert into team values ('t1','Black Eagles','2008-7-04'),
+    -> ('t2','Banana Slugs','2007-5-22'),
+    -> ('t3','Preachers','2010-9-28'),
+    -> ('t4' , 'Rebels','2012-10-30'),
+    -> ('t5', 'Avengers','2013-12-02'),
+    -> ('t6', 'Red Devils','2013-11-22');
+Query OK, 6 rows affected (0.43 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> select * from team;
++---------+--------------+-------------+
+| team_id | team_name    | foundeddate |
++---------+--------------+-------------+
+| t1      | Black Eagles | 2008-07-04  |
+| t2      | Banana Slugs | 2007-05-22  |
+| t3      | Preachers    | 2010-09-28  |
+| t4      | Rebels       | 2012-10-30  |
+| t5      | Avengers     | 2013-12-02  |
+| t6      | Red Devils   | 2013-11-22  |
++---------+--------------+-------------+
+6 rows in set (0.00 sec)
+
+
+reate table player(
+    -> player_id varchar(30) primary key,
+    -> player_name varchar(100),
+    -> jersyno int,
+    -> salary decimal,
+    -> team_id varchar(30),
+    -> foreign key(team_id) references team(team_id),
+    -> height decimal);
+Query OK, 0 rows affected (1.91 sec)
+
+mysql> Alter table player ADD(age int);
+Query OK, 0 rows affected (0.87 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> insert into player values('p1','Lionel Messi',10,420000,'t1',5,25),
+    -> ('p2', 'Xavi', 6,500000,'t1',6,32),
+    -> ('p3', 'Neymar', 2, 450000 ,'t2', 5.8,28),
+    -> ('p4' , 'Willian',7, 600000 , 't3', 5.5,27),
+    -> ('p5 ','Oscar',5 ,390000 , 't4', 6.2,25),
+    -> ('p6' , 'Andres Iniesta' , 8, 500000,'t5', 6.1,26);
+Query OK, 6 rows affected, 4 warnings (0.26 sec)
+Records: 6  Duplicates: 0  Warnings: 4
+
+mysql> select * from player;
++-----------+----------------+---------+--------+---------+--------+------+
+| player_id | player_name    | jersyno | salary | team_id | height | age  |
++-----------+----------------+---------+--------+---------+--------+------+
+| p1        | Lionel Messi   |      10 | 420000 | t1      |      5 |   25 |
+| p2        | Xavi           |       6 | 500000 | t1      |      6 |   32 |
+| p3        | Neymar         |       2 | 450000 | t2      |      6 |   28 |
+| p4        | Willian        |       7 | 600000 | t3      |      6 |   27 |
+| p5        | Oscar          |       5 | 390000 | t4      |      6 |   25 |
+| p6        | Andres Iniesta |       8 | 500000 | t5      |      6 |   26 |
++-----------+----------------+---------+--------+---------+--------+------+
+6 rows in set (0.00 sec)
+
+select * from player
+    -> where team_id='t1';
++-----------+--------------+---------+--------+---------+--------+------+
+| player_id | player_name  | jersyno | salary | team_id | height | age  |
++-----------+--------------+---------+--------+---------+--------+------+
+| p1        | Lionel Messi |      10 | 420000 | t1      |      5 |   25 |
+| p2        | Xavi         |       6 | 500000 | t1      |      6 |   32 |
++-----------+--------------+---------+--------+---------+--------+------+
+2 rows in set (0.06 sec)
+
+
+select * from player
+    ->     where salary>500000;
++-----------+-------------+---------+--------+---------+--------+------+
+| player_id | player_name | jersyno | salary | team_id | height | age  |
++-----------+-------------+---------+--------+---------+--------+------+
+| p4        | Willian     |       7 | 600000 | t3      |      6 |   27 |
++-----------+-------------+---------+--------+---------+--------+------+
+1 row in set (0.00 sec)
+
+
+select team.*,sum(salary)
+    -> from team,player
+    -> where team.team_id=player.team_id and team.team_id='t1';
++---------+--------------+-------------+-------------+
+| team_id | team_name    | foundeddate | sum(salary) |
++---------+--------------+-------------+-------------+
+| t1      | Black Eagles | 2008-07-04  |      920000 |
++---------+--------------+-------------+-------------+
+1 row in set (0.02 sec)
+
+select * from player
+    ->      where height<6;
++-----------+--------------+---------+--------+---------+--------+------+
+| player_id | player_name  | jersyno | salary | team_id | height | age  |
++-----------+--------------+---------+--------+---------+--------+------+
+| p1        | Lionel Messi |      10 | 420000 | t1      |      5 |   25 |
++-----------+--------------+---------+--------+---------+--------+------+
+1 row in set (0.00 sec)
+
+select team.*,avg(salary)
+    ->     from team,player
+    ->     where team.team_id=player.team_id and team.team_id='t1';
++---------+--------------+-------------+-------------+
+| team_id | team_name    | foundeddate | avg(salary) |
++---------+--------------+-------------+-------------+
+| t1      | Black Eagles | 2008-07-04  | 460000.0000 |
++---------+--------------+-------------+-------------+
+1 row in set (0.00 sec)
+
+
+select player_name,salary
+    ->     from player
+    ->     where salary in (select min(salary) from player);
++-------------+--------+
+| player_name | salary |
++-------------+--------+
+| Oscar       | 390000 |
++-------------+--------+
+1 row in set (0.06 sec)
+
+select player_name,salary
+    ->     from player
+    ->     where salary in (select max(salary) from player);
++-------------+--------+
+| player_name | salary |
++-------------+--------+
+| Willian     | 600000 |
++-------------+--------+
+1 row in set (0.00 sec)
+
+ select * from player
+    ->     where age>30 and salary>200000;
++-----------+-------------+---------+--------+---------+--------+------+
+| player_id | player_name | jersyno | salary | team_id | height | age  |
++-----------+-------------+---------+--------+---------+--------+------+
+| p2        | Xavi        |       6 | 500000 | t1      |      6 |   32 |
++-----------+-------------+---------+--------+---------+--------+------+
+1 row in set (0.00 sec)
