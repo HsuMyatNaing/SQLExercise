@@ -1,0 +1,143 @@
+ create table menu(
+		menu_id varchar(13) primary key,
+		name varchar(100),
+		description varchar(500)
+);
+
+insert into menu values('m1','pizza','This is pizza');
+Query OK, 1 row affected (0.19 sec)
+
+mysql> insert into menu values('m2','chicken','This is chicken'),
+    -> ('m3','burgar','This is bugar'),
+    -> ('m4','coffee','This is coffee');
+Query OK, 3 rows affected (0.10 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+select * from menu;
++---------+---------+-----------------+
+| menu_id | name    | description     |
++---------+---------+-----------------+
+| m1      | pizza   | This is pizza   |
+| m2      | chicken | This is chicken |
+| m3      | burgar  | This is bugar   |
+| m4      | coffee  | This is coffee  |
++---------+---------+-----------------+
+4 rows in set (0.25 sec)
+
+create table food(
+		food_id varchar(13) primary key,
+		food_name varchar(100) UNIQUE,
+		price varchar(100) NOT NULL,
+		menu_id varchar(13),
+		foreign key(menu_id) references menu(menu_id)
+		);
+
+insert into food values('f1','white pizza','20000','m1'),
+    -> ('f2','cheese burgar','5000','m3'),
+    -> ('f3','black coffee','3000','m4'),
+    -> ('f4','hot chicken','20000','m2');
+Query OK, 4 rows affected (0.23 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> select * from food;
++---------+---------------+-------+---------+
+| food_id | food_name     | price | menu_id |
++---------+---------------+-------+---------+
+| f1      | white pizza   | 20000 | m1      |
+| f2      | cheese burgar | 5000  | m3      |
+| f3      | black coffee  | 3000  | m4      |
+| f4      | hot chicken   | 20000 | m2      |
++---------+---------------+-------+---------+
+4 rows in set (0.00 sec)
+
+ create table orderTable(order_id varchar(30) primary key,
+    -> sale_date date,qty int,
+    -> food_id varchar(13),
+    -> foreign key(food_id) references food(food_id),
+    -> price double,totalPrice double);
+Query OK, 0 rows affected (1.81 sec)
+
+
+insert into orderTable values('o1','2020-7-10',5,'f1',50000,250000),
+    -> ('o2','2020-7-12',7,'f1',70000,490000),
+    -> ('o3','2020-7-15',5,'f2',50000,250000),
+    -> ('o4','2020-7-16',10,'f3',100000,1000000);
+Query OK, 4 rows affected (0.34 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> select * from orderTable;
++----------+------------+------+---------+--------+------------+
+| order_id | sale_date  | qty  | food_id | price  | totalPrice |
++----------+------------+------+---------+--------+------------+
+| o1       | 2020-07-10 |    5 | f1      |  50000 |     250000 |
+| o2       | 2020-07-12 |    7 | f1      |  70000 |     490000 |
+| o3       | 2020-07-15 |    5 | f2      |  50000 |     250000 |
+| o4       | 2020-07-16 |   10 | f3      | 100000 |    1000000 |
++----------+------------+------+---------+--------+------------+
+4 rows in set (0.00 sec)
+
+
+select food.food_name,orderTable.totalPrice
+    -> from food,orderTable
+    -> where orderTable.totalPrice
+    ->  IN(select max(orderTable.totalPrice) from orderTable)
+    -> group by orderTable.food_id;
++--------------+------------+
+| food_name    | totalPrice |
++--------------+------------+
+| black coffee |    1000000 |
++--------------+------------+
+1 row in set (0.06 sec)
+
+select food.food_name,max(orderTable.totalPrice)
+    -> from food,orderTable
+    -> where food.food_id=orderTable.food_id
+    -> group by food.food_id;
++---------------+----------------------------+
+| food_name     | max(orderTable.totalPrice) |
++---------------+----------------------------+
+| white pizza   |                     490000 |
+| cheese burgar |                     250000 |
+| black coffee  |                    1000000 |
++---------------+----------------------------+
+3 rows in set (0.10 sec)
+
+select food.food_name,min(orderTable.totalPrice)
+    -> from food,orderTable
+    -> where food.food_id=orderTable.food_id
+    -> group by food.food_id;
++---------------+----------------------------+
+| food_name     | min(orderTable.totalPrice) |
++---------------+----------------------------+
+| white pizza   |                     250000 |
+| cheese burgar |                     250000 |
+| black coffee  |                    1000000 |
++---------------+----------------------------+
+3 rows in set (0.00 sec)
+
+
+select sale_date,sum(totalPrice) as sale_amount
+    -> from orderTable
+    -> group by sale_date;
++------------+-------------+
+| sale_date  | sale_amount |
++------------+-------------+
+| 2020-07-10 |      500000 |
+| 2020-07-12 |      490000 |
+| 2020-07-15 |      250000 |
+| 2020-07-16 |     1000000 |
++------------+-------------+
+4 rows in set (0.00 sec)
+
+select sum(totalPrice)
+    -> from orderTable
+    -> where sale_date between '2020-07-12'
+    -> and '2020-7-15';
++-----------------+
+| sum(totalPrice) |
++-----------------+
+|          740000 |
++-----------------+
+1 row in set (0.00 sec)
+
+
